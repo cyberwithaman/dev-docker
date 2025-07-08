@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Web Interfaces</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .table-container {
+            padding: 2rem;
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            color: #495057;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            color: #495057;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-color: #2980b9;
+            color: white;
+        }
+
+        .service-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .service-table thead {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+        }
+
+        .service-table th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .service-table td {
+            border: none;
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .service-table tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .service-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .url-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .url-link:hover {
+            color: #2980b9;
+            transform: translateX(5px);
+        }
+
+        .credentials {
+            background: #f8f9fa;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .credentials.none {
+            background: #e9ecef;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .note-section {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 2rem 2rem 2rem;
+            position: relative;
+        }
+
+        .note-section::before {
+            content: '\f06a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f39c12;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .note-text {
+            margin: 0;
+            font-weight: 500;
+            color: #856404;
+            padding-left: 1rem;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem 2rem;
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #6c757d;
+            margin: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .service-table {
+                font-size: 0.8rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-container {
+                margin: 1rem;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .filter-btn {
+                margin: 0.25rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="fas fa-server me-3"></i>Access Web Interfaces</h1>
+                <p>Professional Development Environment Dashboard</p>
+            </div>
+
+            <div class="table-container">
+                <div class="filter-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h5 class="mb-0 text-muted">Filter by Category:</h5>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" data-filter="all">
+                                    <i class="fas fa-th-large"></i>All Services
+                                </button>
+                                <button class="filter-btn" data-filter="database">
+                                    <i class="fas fa-database"></i>Databases
+                                </button>
+                                <button class="filter-btn" data-filter="webserver">
+                                    <i class="fas fa-globe"></i>Web Servers
+                                </button>
+                                <button class="filter-btn" data-filter="service">
+                                    <i class="fas fa-cogs"></i>Services
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table service-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-cogs me-2"></i>Service</th>
+                                <th><i class="fas fa-link me-2"></i>URL</th>
+                                <th><i class="fas fa-user me-2"></i>Username</th>
+                                <th><i class="fas fa-lock me-2"></i>Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="database">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        pgAdmin
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:5050" target="_blank" class="url-link">
+                                        http://localhost:5050
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">admin@admin.com</span></td>
+                                <td><span class="credentials">admin</span></td>
+                            </tr>
+                            <tr data-category="database">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        phpMyAdmin
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8080" target="_blank" class="url-link">
+                                        http://localhost:8080
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">admin</span></td>
+                                <td><span class="credentials">admin</span></td>
+                            </tr>
+                            <tr data-category="database">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-leaf"></i>
+                                        </div>
+                                        Mongo Express
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8081" target="_blank" class="url-link">
+                                        http://localhost:8081
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">admin</span></td>
+                                <td><span class="credentials">admin</span></td>
+                            </tr>
+                            <tr data-category="database">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-tools"></i>
+                                        </div>
+                                        Adminer (SQLite)
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8082" target="_blank" class="url-link">
+                                        http://localhost:8082
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-cloud"></i>
+                                        </div>
+                                        Appwrite
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost" target="_blank" class="url-link">
+                                        http://localhost
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">root</span></td>
+                                <td><span class="credentials">rootpassword</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        Maildev
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:1080" target="_blank" class="url-link">
+                                        http://localhost:1080
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-rocket"></i>
+                                        </div>
+                                        Supabase Studio
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8083" target="_blank" class="url-link">
+                                        http://localhost:8083
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-rocket"></i>
+                                        </div>
+                                        Supabase REST
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:3001" target="_blank" class="url-link">
+                                        http://localhost:3001
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">anon</span></td>
+                                <td><span class="credentials">super-secret-jwt</span></td>
+                            </tr>
+                            <tr data-category="webserver">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        Apache Web Server
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8086" target="_blank" class="url-link">
+                                        http://localhost:8086
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="webserver">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        Nginx Web Server
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8087" target="_blank" class="url-link">
+                                        http://localhost:8087
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        InfluxDB
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8088" target="_blank" class="url-link">
+                                        http://localhost:8088
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">admin</span></td>
+                                <td><span class="credentials">adminadmin</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        MinIO Console
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:9001" target="_blank" class="url-link">
+                                        http://localhost:9001
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials">minio</span></td>
+                                <td><span class="credentials">minio123</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-server"></i>
+                                        </div>
+                                        Apache Tomcat
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:8089" target="_blank" class="url-link">
+                                        http://localhost:8089
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                            <tr data-category="service">
+                                <td>
+                                    <div class="service-name">
+                                        <div class="service-icon">
+                                            <i class="fas fa-network-wired"></i>
+                                        </div>
+                                        Nginx Proxy Manager (Admin UI)
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="http://localhost:81" target="_blank" class="url-link">
+                                        http://localhost:81
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                                <td><span class="credentials none">(none)</span></td>
+                                <td><span class="credentials none">(none)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="note-section">
+                <p class="note-text">
+                    <strong>Note:</strong> Some services may require you to create a user on first login or use the
+                    credentials above for database connections.
+                </p>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalServices">16</div>
+                    <div class="stat-label">Total Services</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Databases</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Web Servers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">Services</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const tableRows = document.querySelectorAll('tbody tr');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const filter = this.getAttribute('data-filter');
+
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Filter table rows
+                    let visibleCount = 0;
+                    tableRows.forEach(row => {
+                        const category = row.getAttribute('data-category');
+                        if (filter === 'all' || category === filter) {
+                            row.style.display = '';
+                            row.classList.add('fade-in');
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                            row.classList.remove('fade-in');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

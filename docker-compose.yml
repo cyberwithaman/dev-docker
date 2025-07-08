@@ -1,0 +1,259 @@
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: devdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: devdb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: admin
+      PMA_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  # MongoDB
+  mongo:
+    image: mongo:6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+      ME_CONFIG_MONGODB_SERVER: mongo
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+
+  # SQLite (via Adminer)
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=sqlite
+
+  # Appwrite
+  appwrite:
+    image: appwrite/appwrite:1.4.13
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      _APP_ENV: development
+      _APP_OPENSSL_KEY_V1: some-secret-key
+      _APP_DOMAIN: localhost
+      _APP_DOMAIN_TARGET: localhost
+      _APP_REDIS_HOST: redis
+      _APP_DB_HOST: mariadb
+      _APP_DB_USER: root
+      _APP_DB_PASS: rootpassword
+      _APP_DB_SCHEMA: appwrite
+    depends_on:
+      - mariadb
+      - redis
+      - maildev
+      - clamav
+      - influxdb
+      - minio
+    volumes:
+      - appwrite:/storage:rw
+
+  mariadb:
+    image: mariadb:10.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: appwrite
+    volumes:
+      - mariadbdata:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    restart: always
+    volumes:
+      - redisdata:/data
+
+  maildev:
+    image: maildev/maildev
+    restart: always
+    ports:
+      - "1080:1080"
+
+  clamav:
+    image: clamav/clamav:latest
+    restart: always
+
+  influxdb:
+    image: influxdb:2.0
+    restart: always
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: adminadmin
+      DOCKER_INFLUXDB_INIT_ORG: appwrite
+      DOCKER_INFLUXDB_INIT_BUCKET: appwrite
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: admintoken
+    volumes:
+      - influxdbdata:/var/lib/influxdb2
+
+  minio:
+    image: minio/minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  # Supabase
+  supabase-db:
+    image: supabase/postgres:15.1.0.63
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: supabase
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - supabasedb:/var/lib/postgresql/data
+
+  supabase-rest:
+    image: postgrest/postgrest:v10.1.1
+    restart: always
+    environment:
+      PGRST_DB_URI: postgres://postgres:supabase@supabase-db:5432/postgres
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt
+    depends_on:
+      - supabase-db
+    ports:
+      - "3001:3000"
+
+  supabase-studio:
+    image: supabase/studio:latest
+    restart: always
+    environment:
+      STUDIO_PG_META_URL: http://supabase-db:5432
+    ports:
+      - "8083:3000"
+    depends_on:
+      - supabase-db
+
+  # Apache Web Server
+  apache:
+    image: httpd:2.4
+    restart: always
+    ports:
+      - "8086:80"
+    volumes:
+      - ./apache:/usr/local/apache2/htdocs/
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8087:80"
+    volumes:
+      - ./nginx:/usr/share/nginx/html:ro
+
+  # Apache Tomcat
+  tomcat:
+    image: tomcat:10.1
+    restart: always
+    ports:
+      - "8089:8080"
+    volumes:
+      - tomcatdata:/usr/local/tomcat
+
+  # Nginx Proxy Manager
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    restart: always
+    ports:
+      - "81:81"      # Admin UI
+      - "8088:80"    # HTTP
+      - "4443:443"   # HTTPS
+    environment:
+      - DB_SQLITE_FILE=/data/database.sqlite
+    volumes:
+      - npmdata:/data
+      - npmletsencrypt:/etc/letsencrypt
+  
+  # Web UI Index Page
+  webui-index:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8888:80"
+    volumes:
+      - ./access-web-interfaces.html:/usr/share/nginx/html/index.html:ro
+
+volumes:
+  pgdata:
+  mysqldata:
+  mongodata:
+  appwrite:
+  mariadbdata:
+  redisdata:
+  influxdbdata:
+  miniodata:
+  supabasedb:
+  tomcatdata:
+  npmdata:
+  npmletsencrypt:

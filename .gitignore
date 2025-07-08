@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+
+# Docker volumes and data
+pgdata/
+mysqldata/
+mongodata/
+oracledb/
+appwrite/
+mariadbdata/
+redisdata/
+influxdbdata/
+miniodata/
+supabasedb/
+libreoffice-config/
+libreoffice-data/
+onlyoffice-data/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# Ignore built files
+/dist/
+/build/
+
+# Ignore HTML/Index copies
+apache/
+nginx/
+
+# Ignore Docker Compose override
+/docker-compose.override.yml
